@@ -1,0 +1,42 @@
+The Zebu runtime system is all you need if you want to use the
+parser/generator that was produced by the compiler (in form of a .tab
+file).
+
+The Zebu-compiler is necessary in order to convert the external
+grammar description (in form of a .zb file) into a LALR(1) parsing
+table (in form of a .tab file), and associated printers and semantic
+functions (in form of a <grammar-name>-domain.lisp file).
+
+Installation (using MK:DEFSYSTEM)
+---------------------------------
+
+Unpack a fresh, vintage Zebu distribution in a directory of your
+choice.  Unpack the archive of the system files over it (or the other
+way 'round -- everybody was careful not to overwrite any files here.)
+
+Copy the .system files over to a location where mk:defsystem will find
+them (a common location for private installation is
+#p"home:lisp;systems;").  Change the source- and binary-pathname
+parameters in the definition files to point to the place where your
+zebu files dwell.
+
+The system definition files are:
+
+	zebu.system             the runtime system
+	zebu-compiler.system    the compiler
+	zebu-rr.system          the rewrite rule system
+
+To compile a freshly installed zebu, evaluate:
+
+        (mk:operate-on-system "zebu" 'compile)
+        (mk:operate-on-system "zebu-compiler" 'compile)
+        (mk:operate-on-system "zebu-rr" 'compile)
+
+To load a component of zebu, just evaluate (require :<system-name>).
+
+Please tell me if installation works for you and, more importantly,
+when it does not.  Other reports/praise/money should go to the
+original author.
+
+
+Rudi Schlatte <rschlatt@ist.tu-graz.ac.at>
