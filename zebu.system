@@ -1,0 +1,22 @@
+;;; -*- Lisp -*-
+
+(mk:defsystem "zebu"
+  :source-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/"
+  :binary-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/binary/"
+  ;;:package "ZEBU"
+  :components ((:module "zebu-kernel"
+                        :source-pathname ""
+			:components ((:file "zebu-defsystem-package")
+				     (:file "zebu-aux"
+					    :depends-on ("zebu-defsystem-package"))
+				     (:file "zebu-mg-hierarchy"
+					    :depends-on ("zebu-defsystem-package"))))
+	       (:module "zebu-runtime"
+                        :source-pathname ""
+			:depends-on ("zebu-kernel")
+			:components ((:file "zebu-loader")
+				     (:file "zebu-driver"
+					    :depends-on ("zebu-loader"))
+				     (:file "zebu-actions"
+					    :depends-on ("zebu-loader"))))))
+                      

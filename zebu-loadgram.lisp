@@ -7,18 +7,12 @@
 ; Language:     CL
 ; Package:      ZEBU
 ; Status:       Experimental (Do Not Distribute) 
-; RCS $Header: /logon/CVS/logon/uib/lisp/lib/zebu/zebu-loadgram.lisp,v 1.1 2005/06/08 08:40:00 paul Exp $
+; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Revisions:
-; RCS $Log: zebu-loadgram.lisp,v $
-; RCS Revision 1.1  2005/06/08 08:40:00  paul
-; RCS Files necessary for cgp
-; RCS
-; RCS Revision 1.1.1.1  2001/05/09 14:46:31  paul
-; RCS Zebu 3.3.5 with Rudi Schlatte's adaptation to mk-defsytem
-; RCS
+; RCS $Log: $
 ; 26-Jul-94 (Joachim H. Laubsch)
 ;  Fixed Bug with "." as separator (ambiguous constituent names were made)
 ; 12-Mar-93 (Joachim H. Laubsch)
@@ -449,69 +443,65 @@ property.
 	(when (feat-term-p val)
 	    (feat-term-substitute new old val))))))
 
-(defun parse-defrule (rule &key qualifier)
-  (let ((name ()))
-    (unless (and (consp rule) 
-		 (symbolp (car rule))
-		 (string= (string (car rule)) "DEFRULE")
-		 (consp (cdr rule))
-		 (symbolp (setq name (cadr rule))))
-      (error "Illegal rule ~S" rule))
-    #+buggy
-    (when qualifier ;; pm: This ensures that each zebu grammar file has its own pseudo-namespace
-      (setf name (intern (concatenate 'string (string-upcase qualifier) "+" (symbol-name name)) (symbol-package name))))
-    (let ((args (cddr rule)) rhs)
-      (flet ((parse-build (&key form type map)
-	       (cond ((and (not form) type)
-		      (if (symbolp type)
-			  (setf form (generate-form type map))
-			  (error "Symbol expected as value of :type ~S in ~S"
-				 type rhs))))
-	       (multiple-value-bind (ll dummies)
-		   (make-lambda-list rhs)
-		 (setq dummies
-		       (nconc dummies
-			      (mapcan #'(lambda (l)
-					  (unless (member l dummies)
+(defun parse-defrule (rule &aux name)
+  (unless (and (consp rule) 
+	       (symbolp (car rule))
+	       (string= (string (car rule)) "DEFRULE")
+	       (consp (cdr rule))
+	       (symbolp (setq name (cadr rule))))
+    (error "Illegal rule ~S" rule))
+  (let ((args (cddr rule)) rhs)
+    (flet ((parse-build (&key form type map)
+	     (cond ((and (not form) type)
+		    (if (symbolp type)
+			(setf form (generate-form type map))
+		      (error "Symbol expected as value of :type ~S in ~S"
+			     type rhs))))
+	     (multiple-value-bind (ll dummies)
+		 (make-lambda-list rhs)
+	       (setq dummies
+		     (nconc dummies
+			    (mapcan #'(lambda (l)
+					(unless (member l dummies)
 					    (unless (search-list l form)
-					      (list l))))
-				      ll)))
-		 ;; now generate the functions from the actions
-		 `(lambda ,ll
-		   ,@(when dummies `((declare (ignore .,dummies))))
-		   ,form)
-		 )))
-	(let ((R (make-zb-rule :-name name)) action rest)
-	  (do ((args args rest))
-	      ((null args)
-	       (setf (zb-rule--productions r) (nreverse (zb-rule--productions r)))
-	       R)
-	    (let ((key (car args))
-		  (val (cadr args)))
-	      (setq rest (cddr args))
-	      (if (eq key ':=)
-		  (progn
-		    (setq rhs (if (listp val) val (list val)))
-		    (if (and (consp rest) (eq (car rest) ':BUILD))
-			;; BUILD clause: construct fn and compile it
-			(let ((build-args (cadr rest)))
-			  (setq action
-				(if (atom build-args)
-				    (if (symbolp build-args)
-					build-args
-					(parse-build :FORM build-args))
-				    (if (keywordp (car build-args))
-					(apply #'parse-build build-args)
-					(parse-build :FORM build-args))))
-			  (setq rest (cddr rest)))
-			;; no :BUILD clause, use IDENTITY fn
-			(setq action 
-			      (if (= (length rhs) 1) 'identity 'identity*))))
-		  (error "Keyword expected in rule ~S at .. ~{~S ~}~% Probably no () around rule's rhs"
-			 name args))
-	      (push (make-production-rhs :-syntax rhs
-					 :-build-fn action)
-		    (zb-rule--productions r)))))))))
+						(list l))))
+				    ll)))
+	       ;; now generate the functions from the actions
+	       `(lambda ,ll
+		 ,@(when dummies `((declare (ignore .,dummies))))
+		 ,form)
+	       )))
+      (let ((R (make-zb-rule :-name name)) action rest)
+	(do ((args args rest))
+	    ((null args)
+	     (setf (zb-rule--productions r) (nreverse (zb-rule--productions r)))
+	     R)
+	  (let ((key (car args))
+		(val (cadr args)))
+	    (setq rest (cddr args))
+	    (if (eq key ':=)
+		(progn
+		  (setq rhs (if (listp val) val (list val)))
+		  (if (and (consp rest) (eq (car rest) ':BUILD))
+		      ;; BUILD clause: construct fn and compile it
+		      (let ((build-args (cadr rest)))
+			(setq action
+			      (if (atom build-args)
+				  (if (symbolp build-args)
+				      build-args
+				    (parse-build :FORM build-args))
+				(if (keywordp (car build-args))
+				    (apply #'parse-build build-args)
+				  (parse-build :FORM build-args))))
+			(setq rest (cddr rest)))
+		    ;; no :BUILD clause, use IDENTITY fn
+		    (setq action 
+			  (if (= (length rhs) 1) 'identity 'identity*))))
+	      (error "Keyword expected in rule ~S at .. ~{~S ~}~% Probably no () around rule's rhs"
+		     name args))
+	    (push (make-production-rhs :-syntax rhs
+				       :-build-fn action)
+		  (zb-rule--productions r))))))))
 
 (defun cons-avm (Feat-Term)
   (let ((type (Feat-Term--type Feat-Term)))
@@ -645,8 +635,7 @@ property.
     (when (eq (car options) name) (RETURN (cadr options)))))
 
 (defun load-grammar (filename &key (verbose T)
-		     (qualified-names T) ;; pm
-		     &aux (g-file (probe-file filename)))
+			      &aux (g-file (probe-file filename)))
   (unless g-file
     (error "grammar file not found: ~S" filename))
   (format t "~%Reading grammar from ~A~%" filename)
@@ -668,9 +657,7 @@ property.
 		      (read grammar-stream) g-file t))))
 	   (setq *lex-cats* (get-grammar-options-key ':lex-cats))
 	   (if (eq *compiler-grammar* *NULL-Grammar*)
-	       (let ((eof (list nil))
-		     (grammar-name (get-grammar-options-key ':name)) ;; pm
-		     )  
+	       (let ((eof (list nil)))  
 		 (pre-process-rules
 		  #'(lambda ()
 		      (loop (let ((rule (read grammar-stream nil eof)))
@@ -678,11 +665,11 @@ property.
 			      (if (consp rule)
 				  (if (eq rule eof)
 				      (return nil)
-				      (if (eq (car rule) 'defstruct)
-					  (push rule *domain-structs*)
-					  (return (parse-defrule rule :qualifier (when qualified-names grammar-name)))))
-				  (warn "In file ~a~% illegal rule ~s ignored!"
-					g-file rule)))))
+				    (if (eq (car rule) 'defstruct)
+					(push rule *domain-structs*)
+				      (return (parse-defrule rule))))
+				(warn "In file ~a~% illegal rule ~s ignored!"
+				       g-file rule)))))
 		  nil))
 	     (let (*preserve-case*
 		   *Kleene+-rules*

@@ -1,0 +1,37 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         useless.zb
+; Description:  Zebu Grammar Example with useless nonterminals
+; Author:       Joachim H. Laubsch
+; Language:     CL
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "useless")
+
+(defrule S := A
+	   := B)
+
+(defrule A := "a")
+
+(defrule B := (B "b") )
+
+(defrule C := "c")
+
+#||
+(setf (SYSTEM::environment-variable "zebutest") "~/hpnlrw/zebu/test")
+(let ((*load-verbose* t))
+  (compile-slr-grammar
+   (merge-pathnames "useless.zb" *ZEBU-test-directory*)))
+;;; Warning: The following non-terminals where defined but not used: C 
+
+(setq zebu:*current-grammar*
+      (zebu-load-file (merge-pathnames "useless.tab"
+				       *ZEBU-test-directory*)))
+(progn (format t "symbols: ") (terpri) (zebu::cruise-symbols-2))
+(zebu::print-collection t)
+
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            End of useless.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

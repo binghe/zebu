@@ -16,15 +16,16 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package "ZEBU")
+(in-package #:ZEBU)
 
 (eval-when (:compile-toplevel)
+  (ignore-errors
+    (delete-file (merge-pathnames "zebu-mg.tab" *compile-file-truename*))
+    (delete-file (merge-pathnames "zmg-dom.lisp" *compile-file-truename*)))
   (zebu-compile-file
-   (merge-pathnames "zebu-mg" *zebu-directory*)
-   :output-file (merge-pathnames
-                 "zebu-mg" *zebu-binary-directory*)))
+   (merge-pathnames "zebu-mg.zb" *compile-file-truename*)))
+
 
 (eval-when (:load-toplevel)
   (zebu-load-file
-   (merge-pathnames "zebu-mg"
-                    *zebu-binary-directory*)))
+   (merge-pathnames "zebu-mg.tab" *load-truename*)))

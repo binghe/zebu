@@ -1,24 +1,20 @@
-; -*- mode:     CL -*- ----------------------------------------------------- ;
-; File:         zebu-package.l
-; Description:  package definition
-; Author:       Joachim H. Laubsch
-; Created:      13-Nov-91
-; Modified:     Thu Mar  7 09:13:58 1996 (Joachim H. Laubsch)
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         zebu-defsystem-package.lisp
+; Description:  package definition (mk:defsystem version)
+; Author:       Rudi Schlatte, based on zebu-package.lisp by J.Laubsch
 ; Language:     CL
 ; Package:      CL-USER
 ; Status:       Experimental (Do Not Distribute) 
-; RCS $Header: /logon/CVS/logon/uib/lisp/lib/zebu/zebu-package.lisp,v 1.1 2005/06/08 08:40:00 paul Exp $
 ;
-; (c) Copyright 1991, Hewlett-Packard Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Revisions:
-; RCS $Log: zebu-package.lisp,v $
-; RCS Revision 1.1  2005/06/08 08:40:00  paul
-; RCS Files necessary for cgp
-; RCS
-; RCS Revision 1.1.1.1  2001/05/09 14:46:29  paul
-; RCS Zebu 3.3.5 with Rudi Schlatte's adaptation to mk-defsytem
-; RCS
+; Package and parameter definitions for use with mk:defsystem.
+; Eliminates dependence on some symbols (*ZEBU-directory* et al.)
+; being present in CL-USER.
+;
+; This file REPLACES zebu-package.lisp when using mk:defsystem for the
+; load process.  Rationale: zebu-package.lisp expects some symbols and
+; packages to be present, and setting everything up including creating
+; a fake package PSGRAPH was not something very clean to do.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (in-package "CL-USER")
@@ -28,26 +24,34 @@
 (eval-when (compile load eval)
   (defmacro LCL::DECLAIM (decl-spec) `(proclaim ',decl-spec)))
 
-#+LUCID
-(defpackage "PSGRAPH"
-    (:use "LUCID-COMMON-LISP"))
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   This package is not used anywhere
+;;#+LUCID
+;;(defpackage "PSGRAPH"
+;;    (:use "LUCID-COMMON-LISP"))
+;;
+;;#-LUCID
+;;(defpackage "PSGRAPH"
+;;    (:use "COMMON-LISP"))
 
-#-LUCID
-(defpackage "PSGRAPH"
-    (:use "COMMON-LISP"))
 
 (defpackage "ZEBU"
     (:nicknames "ZB")
     #+LUCID (:use "LISP" "LUCID-COMMON-LISP")
     #+LUCID (:import-from "SYSTEM" "*KEYWORD-PACKAGE*")
-    #+LUCID (:import-from "LCL" "DECLAIM")
-    (:import-from "PSGRAPH" PSGRAPH::PSGRAPH)
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Gives an error when loading compiled files
+;;    #+LUCID (:import-from "LCL" "DECLAIM")
+;;    (:import-from "PSGRAPH" PSGRAPH::PSGRAPH)
     #+MCL   (:use "COMMON-LISP" "CCL")
     #+KCL   (:use "LISP")
     #+ALLEGRO (:use "COMMON-LISP" "EXCL")
+    #-(or lucid mcl kcl allegro) (:use "COMMON-LISP")
     
-    (:import-from "CL-USER" CL-USER::*ZEBU-DIRECTORY*
-		  CL-USER::*ZEBU-binary-directory*)
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Defined in this file / package instead, see below
+;;    (:import-from "CL-USER" CL-USER::*ZEBU-DIRECTORY*
+;;                  CL-USER::*ZEBU-binary-directory*)
     (:export "*COMMENT-BRACKETS*" "*COMMENT-START*" "*PRESERVE-CASE*"
 	     "*CASE-SENSITIVE*"
 	     "*DISALLOW-PACKAGES*" "*STRING-DELIMITER*"
@@ -81,24 +85,130 @@
 	     "ZEBU" "ZEBU-COMPILER" "ZEBU-COMPILE-FILE" "ZEBU-LOAD-FILE"
 	     "ZEBU-RR" "ZEBU-TOP"
 	     )
-    #-LUCID
-    (:import-from "CL-USER"
-		  CL-USER::*LOAD-SOURCE-PATHNAME-TYPES*
-		  CL-USER::*LOAD-BINARY-PATHNAME-TYPES*))
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Defined in this file / package instead, see below
+;;    #-LUCID
+;;    (:import-from "CL-USER"
+;;                  CL-USER::*LOAD-SOURCE-PATHNAME-TYPES*
+;;                  CL-USER::*LOAD-BINARY-PATHNAME-TYPES*))
+    )
 
 (in-package "ZB")
+
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Moved definitions of *ZEBU-direcotory*, *ZEBU-binary-directory*
+;;;   over from ZEBU-init.lisp, got rid of importing symbols from
+;;;   CL-USER in (defpackage "ZEBU")
+
+; edit the following form for your Lisp, and the directory where you keep Zebu
+(defparameter *ZEBU-directory*
+  (make-pathname 
+   :directory  ;; Might be loading zebu-package-fasl from the binary directory
+   (remove "binary" (pathname-directory *load-truename*)
+           :from-end t :test #'string-equal
+           :count 1 :end 1))
+  "The location of the ZEBU source files.")
+   
+;;---------------------------------------------------------------------------;
+;; *ZEBU-binary-directory*
+;;------------------------
+;; directory for compiled grammars and lisp files
+;; 
+(defparameter *ZEBU-binary-directory*
+  (make-pathname :directory (append (pathname-directory *ZEBU-directory*)
+                                    (list "binary")))
+  "The location of the compiled ZEBU files.")
+
+
+
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Extensions are defined multiple times in COMPILE-Zebu.lisp and
+;;;   ZEBU-init.lisp
+;;;   I was lazy and snarfed a list from mk:defsystem 3.x  :-)
+;;; TODO
+;;;   Do something clever with the environment package from CLOCC;
+;;;   such a list should really be maintained in one place only.
+
+;;; *filename-extensions* is a cons of the source and binary extensions.
+(defvar *filename-extensions*
+  (car `(#+(and Symbolics Lispm)              ("lisp" . "bin")
+         #+(and dec common vax (not ultrix))  ("LSP"  . "FAS")
+         #+(and dec common vax ultrix)        ("lsp"  . "fas")
+ 	 #+ACLPC                              ("lsp"  . "fsl")
+ 	 #+CLISP                              ("lsp"  . "fas")
+         #+KCL                                ("lsp"  . "o")
+         #+IBCL                               ("lsp"  . "o")
+         #+Xerox                              ("lisp" . "dfasl")
+	 ;; Lucid on Silicon Graphics
+	 #+(and Lucid MIPS)                   ("lisp" . "mbin")
+	 ;; the entry for (and lucid hp300) must precede
+	 ;; that of (and lucid mc68000) for hp9000/300's running lucid,
+	 ;; since *features* on hp9000/300's also include the :mc68000
+	 ;; feature.
+	 #+(and lucid hp300)                  ("lisp" . "6bin")
+         #+(and Lucid MC68000)                ("lisp" . "lbin")
+         #+(and Lucid Vax)                    ("lisp" . "vbin")
+         #+(and Lucid Prime)                  ("lisp" . "pbin")
+         #+(and Lucid SUNRise)                ("lisp" . "sbin")
+         #+(and Lucid SPARC)                  ("lisp" . "sbin")
+         #+(and Lucid :IBM-RT-PC)             ("lisp" . "bbin")
+	 ;; PA is Precision Architecture, HP's 9000/800 RISC cpu
+	 #+(and Lucid PA)                    ("lisp" . "hbin")
+         #+excl                               ("cl"   . "fasl")
+         #+CMU           ("lisp" . ,(or (c:backend-fasl-file-type c:*backend*)
+					"fasl"))
+;	 #+(and :CMU (not (or :sgi :sparc)))  ("lisp" . "fasl")
+;        #+(and :CMU :sgi)                    ("lisp" . "sgif")
+;        #+(and :CMU :sparc)                  ("lisp" . "sparcf")
+	 #+PRIME                              ("lisp" . "pbin")
+         #+HP                                 ("l"    . "b")
+         #+TI ("lisp" . #.(string (si::local-binary-file-type)))
+         #+:gclisp                            ("LSP"  . "F2S")
+         #+pyramid                            ("clisp" . "o")
+         #+:coral                             ("lisp" . "fasl")
+	 ;; Harlequin LispWorks
+	 #+:lispworks 	      ("lisp" . ,COMPILER:*FASL-EXTENSION-STRING*)
+;        #+(and :sun4 :lispworks)             ("lisp" . "wfasl")
+;        #+(and :mips :lispworks)             ("lisp" . "mfasl")
+         #+:mcl                               ("lisp" . "fasl")
+
+         ;; Otherwise,
+         ("lisp" . ,(pathname-type (compile-file-pathname "foo.lisp")))))
+  "Filename extensions for Common Lisp. A cons of the form
+   (Source-Extension . Binary-Extension). If the system is
+   unknown (as in *features* not known), defaults to \"lisp\" and the
+   file type of compile-file-pathname.")
+
+(defparameter *load-source-pathname-types*
+  (list (car *filename-extensions*)))
+(defparameter *load-binary-pathname-types*
+  (list (cdr *filename-extensions*)))
+
+
+;;; 2000-03-25 by rschlatte@ist.tu-graz.ac.at:
+;;;   Snarfed from ZEBU-init.lisp
+(defvar *zebu-version*
+  (let ((file (make-pathname
+               :name "Version"
+               :type nil
+               :directory (pathname-directory
+                           *zebu-directory*))))
+    (if (probe-file file)
+        (with-open-file (s file :direction :input)
+                        (read-line s))
+      "3.5.5")))
+
 (declaim (special *COMMENT-BRACKETS* *COMMENT-START* *PRESERVE-CASE*
 	          *CASE-SENSITIVE* *DISALLOW-PACKAGES* *STRING-DELIMITER*
 	          *SYMBOL-DELIMITER* *IDENTIFIER-START-CHARS*
 	          *IDENTIFIER-CONTINUE-CHARS*
 	          *ALLOW-CONFLICTS* *WARN-CONFLICTS*
 	          *CURRENT-GRAMMAR* *GENERATE-DOMAIN*
-	          *ZEBU-DIRECTORY*
 	          ))
 
 #-LUCID
 (declaim (special *LOAD-SOURCE-PATHNAME-TYPES*
                   *LOAD-BINARY-PATHNAME-TYPES*))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                            End of zebu-package.l
+;;                            End of zebu-defsystem-package.lisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

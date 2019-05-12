@@ -1,0 +1,21 @@
+;;; -*- Lisp -*-
+
+;;;(in-package "CL-USER")
+
+(mk:defsystem "zebu-rr"
+  :source-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/"
+  :binary-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/binary/"
+  ;;:package "ZEBU"
+  ;; Are the dependencies correct?
+  :depends-on ("zebu") 
+  :components
+  ((:file "zebu-kb-domain")
+   (:file "zebu-tree-attributes"
+          :depends-on ("zebu-kb-domain"))
+   (:file "zebra-debug"
+          :depends-on ("zebu-kb-domain" "zebu-tree-attributes"))))
+
+      
+
+                  
+                      

@@ -7,18 +7,12 @@
 ; Language:     CL
 ; Package:      ZEBU
 ; Status:       Experimental (Do Not Distribute) 
-; RCS $Header: /logon/CVS/logon/uib/lisp/lib/zebu/zebu-dump.lisp,v 1.1 2005/06/08 08:40:00 paul Exp $
+; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Revisions:
-; RCS $Log: zebu-dump.lisp,v $
-; RCS Revision 1.1  2005/06/08 08:40:00  paul
-; RCS Files necessary for cgp
-; RCS
-; RCS Revision 1.1.1.1  2001/05/09 14:46:30  paul
-; RCS Zebu 3.3.5 with Rudi Schlatte's adaptation to mk-defsytem
-; RCS
+; RCS $Log: $
 ; 16-Jul-91 (Joachim H. Laubsch)
 ;  to deal with multiple-grammars, begin a ".tab" file with *GRAMMAR-OPTIONS*
 ;  a keyworded arglist that can be passed to MAKE-GRAMMAR

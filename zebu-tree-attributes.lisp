@@ -7,7 +7,7 @@
 ; Language:     CL
 ; Package:      ZEBU
 ; Status:       Experimental (Do Not Distribute) 
-; RCS $Header: /logon/CVS/logon/uib/lisp/lib/zebu/zebu-tree-attributes.lisp,v 1.1 2005/06/08 08:40:00 paul Exp $
+; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

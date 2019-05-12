@@ -1,4 +1,4 @@
-; -*- mode:     LISP -*- ----------------------------------------------------- ;
+; -*- mode:     CL -*- ----------------------------------------------------- ;
 ; File:         zebu-loader.l
 ; Description:  load a ZEBU grammar table
 ; Author:       Joachim H. Laubsch
@@ -7,21 +7,12 @@
 ; Language:     CL
 ; Package:      ZEBU
 ; Status:       Experimental (Do Not Distribute) 
-; RCS $Header: /logon/CVS/logon/uib/lisp/lib/zebu/zebu-loader.lisp,v 1.1 2005/06/08 08:40:00 paul Exp $
+; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Revisions:
-; RCS $Log: zebu-loader.lisp,v $
-; RCS Revision 1.1  2005/06/08 08:40:00  paul
-; RCS Files necessary for cgp
-; RCS
-; RCS Revision 1.2  2001/05/31 17:15:01  paul
-; RCS Small changes.
-; RCS
-; RCS Revision 1.1.1.1  2001/05/09 14:46:29  paul
-; RCS Zebu 3.3.5 with Rudi Schlatte's adaptation to mk-defsytem
-; RCS
+; RCS $Log: $
 ; 13-Jan-93 (Joachim H. Laubsch)
 ;  implemented terminal-alist access via the vector terminal-alist-SEQ
 ;  5-Nov-91 (Joachim H. Laubsch)

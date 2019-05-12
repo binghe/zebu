@@ -1,0 +1,73 @@
+
+These are system definition files for the Zebu parser compiler.  Zebu
+is a Lex/Yacc-sorta thing for Common Lisp.
+
+Zebu can be found found at
+ftp://ftp.digitool.com/pub/MCL/contrib/zebu-3.5.5.tgz, among other
+places.
+
+Read about Daniel Barlow's asdf (Another System Definition Facility)
+at http://ww.telent.net/cliki/asdf
+
+I have written asdf system definition files, taking the original
+system files as a guideline.  The package definition file
+zebu-package.lisp was rewritten, since it depended on some symbols
+being present in the CL-USER package, amongst other things.  The file
+zebu-compile-mg.lisp was added to compile the metagrammar (can't call
+zb:zebu-compile-file directly from the system files, since at read
+time the "zebu" package does not exist yet).  The file
+zebu-asdf-setup.lisp was added to hook Zebu source files into asdf
+itself.  A asdf system component (:file "some-grammar.zb") should do
+the right thing after loading Zebu itself.
+
+The one thing I was too lazy to do is rewrite #p"test;exercise.lisp".
+This one still excepts some symbols in the CL-USER package that are
+not there anymore (the original zebu-package.lisp imported them, and
+every other file expects them to be within the ZEBU package anyway).
+
+Please report any installation problems to me.  Note that I am not the
+original author of Zebu itself, so I am unlikely to be able to help
+you with hairy bugs in that system.
+
+Oh, yes, how to use it:
+
+- Prepare everything:
+(asdf:operate 'asdf:load-op :zebu-compiler)
+(zb:zebu-compile-file "my-grammar-file.zb")
+(zb:zebu-load-file "my-grammar-file")
+(setf zb:*current-grammar* (zb:find-grammar "my-grammar"))
+
+- Ok now, parse away:
+(zb:file-parser "some-file")
+(zb:read-parser "2*(3+4)=++foo:")
+
+
+Notes:
+
+- Regrettably, Mr. Laubsch seems to be off the 'net at the moment.  I
+tried to contact him and got no reply; other people on comp.lang.lisp
+reported similarly.  I did not want to package a "new" version of Zebu
+without his okay, especially since none of the core functionality is
+changed and I did some package setup differently than him.  Hence, the
+distribution of a "diff" package to be installed over the original
+sources.
+
+- Here is a list of files that I removed, since they are not needed if
+you load Zebu via asdf:
+
+COMPILE-Zebu.lisp
+Compile.lisp
+INSTALL.*           ; except \1.asdf, obviously :-)
+machine
+Makefile
+shar-zebu
+Tar-zebu
+win*                ; Yay!
+ZEBU-init.lisp
+zebu-package.lisp   ; Replaced by new version
+ZEBU-sys.lisp       ; the .system files were modelled after this one
+
+
+Have fun,
+
+Rudi Schlatte <rschlatte@ist.tu-graz.ac.at>

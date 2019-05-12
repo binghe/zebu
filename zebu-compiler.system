@@ -1,0 +1,52 @@
+;;; -*- Lisp -*-
+
+;;;(in-package "CL-USER")
+
+(mk:defsystem "zebu-compiler"
+  :source-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/"
+  :binary-pathname "/users/students/rschlatt/lisp/zebu-3.5.5/binary/"
+  ;;:package "ZEBU"
+  :depends-on ("zebu")
+  :components
+  ((:file "zebu-regex")
+   (:file "zebu-oset")
+   (:file "zebu-kb-domain")   ; not explicitly in ZEBU-sys.lisp
+   (:file "zebu-g-symbol"
+          :depends-on ("zebu-oset"))
+   (:file "zebu-loadgram"
+          :depends-on ("zebu-g-symbol" "zebu-oset"))
+   (:file "zebu-generator"
+          :depends-on ("zebu-loadgram" "zebu-kb-domain"))
+   (:file "zebu-lr0-sets"
+          :depends-on ("zebu-g-symbol" "zebu-loadgram"))
+   (:file "zebu-empty-st"
+          :depends-on ("zebu-loadgram"))
+   (:file "zebu-first"
+          :depends-on ("zebu-loadgram" "zebu-oset"))
+   (:file "zebu-follow"
+          :depends-on ("zebu-loadgram" "zebu-first"))
+   (:file "zebu-tables"
+          :depends-on ("zebu-g-symbol" "zebu-loadgram"
+                       "zebu-lr0-sets"))
+   (:file "zebu-printers"
+          :depends-on ("zebu-loadgram" "zebu-lr0-sets"
+                       "zebu-tables"))
+   (:file "zebu-slr")
+   (:file "zebu-closure"
+          :depends-on ("zebu-oset" "zebu-g-symbol" "zebu-first"))
+   (:file "zebu-lalr1"
+          :depends-on ("zebu-oset" "zebu-lr0-sets" "zebu-follow"))
+   (:file "zebu-dump"
+          :depends-on ("zebu-loadgram" "zebu-slr" "zebu-lalr1"))
+   (:file "zebu-compile"
+          :depends-on ("zebu-dump"))
+   (:file "zebu-compile-mg"
+          :depends-on ("zebu-compile"))
+   (:file "zmg-dom"
+          :depends-on ("zebu-compile-mg"))
+   (:file "zebu-kb-domain"
+          :depends-on ("zmg-dom"))))
+   
+
+                  
+                      

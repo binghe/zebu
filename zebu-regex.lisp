@@ -22,16 +22,7 @@
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Revisions:
-; RCS $Log: zebu-regex.lisp,v $
-; RCS Revision 1.1  2005/06/08 08:40:00  paul
-; RCS Files necessary for cgp
-; RCS
-; RCS Revision 1.2  2004/12/15 12:20:17  paul
-; RCS Support for
-; RCS
-; RCS Revision 1.1.1.1  2001/05/09 14:46:37  paul
-; RCS Zebu 3.3.5 with Rudi Schlatte's adaptation to mk-defsytem
-; RCS
+; RCS $Log: $
 ; 13-Jan-93 (Joachim H. Laubsch)
 ;  Aletrnatives, to be indicated by \| need to be done!
 ;  7-Oct-92 (Joachim H. Laubsch)
@@ -221,7 +212,7 @@
 	     ;; If the first character is carat then invert the set.
 	     (let* ((invert (eql (char source (1+ eindex)) #\^))
 		    (bitstring (make-array
-				char-code-limit
+				256
 				:element-type 'bit
 				:initial-element (if invert 1 0)))
 		    (set-char (if invert 0 1)))
