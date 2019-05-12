@@ -1,0 +1,50 @@
+;; -*- mode: lisp -*-
+
+(:name "pc2"
+ :package "COMMON-LISP-USER"
+ :grammar "zebu-mg")
+
+;; Domain definition
+
+Formula := kb-domain: [];
+ Propositional-variable := Formula: [(-name)];
+ P-Formula              := Formula: [(-content)];
+ Boolean-Expr           := Formula: [(-rand1 Formula) (-rand2 Formula)];
+  Boolean-Or            := Boolean-Expr: [];
+  Boolean-And           := Boolean-Expr: [];
+ Atomic-Wff             := Formula: [(predicate)
+                                     (-Role-Argument-Pairs kb-sequence)];
+ Role-Argument-Pairs    := kb-domain: [(-Role) (-Argument)];
+
+;; Productions
+
+Formula --> Propositional-variable
+            | Boolean-Expr
+            | "(" Formula ")" {P-Formula:[(-content Formula)]}
+            | Atomic-Wff;
+
+Propositional-Variable
+  --> Identifier {Propositional-variable: [(-name Identifier)]};
+
+Boolean-Expr --> Formula.1 "and" Formula.2
+                 {Boolean-And: [(-rand1 Formula.1) (-rand2 Formula.2)]}
+                 | Formula.1 "or" Formula.2
+                   {Boolean-Or: [(-rand1 Formula.1) (-rand2 Formula.2)]};
+
+Atomic-Wff --> Identifier "(" Role-Argument-Pairs ")"
+               { Atomic-Wff: [(-predicate Identifier) 
+                              (-Role-Argument-Pairs Role-Argument-Pairs)]};
+
+Role-Argument-Pairs -->
+                    | Role-Argument-Pair Role-Argument-Pairs
+                      { RAP-list: [(-first Role-Argument-Pair)
+                                   (-rest  Role-Argument-Pairs)]};
+
+Role-Argument-Pair --> Identifier ":" Term
+                       { Role-Argument-Pair:[(-Role Identifier)
+                                             (-Argument Term)]};
+
+Term --> Identifier | Number ;
+
+
+;;;; pc2.zb                           -- 2003-11-13 07:06:45 -- pascal   ;;;;

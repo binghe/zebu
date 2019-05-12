@@ -1,0 +1,26 @@
+;; -*- mode: lisp -*-
+
+(:name "arith-exp"   :grammar  "zebu-mg")
+
+;; Domain definition
+
+Arith-exp := Kb-domain: [];
+Factor    := Arith-exp: [(-value)] <<print-function: Print-factor>>;
+Mult-op   := Arith-exp: [(-arg1) (-arg2)];
+Plus-op   := Arith-exp: [(-arg1) (-arg2)];
+
+
+;; Productions
+
+EE --> EE "+" TT { Plus-op: [(-arg1 EE) (-arg2 TT)] }
+       | TT ;
+
+TT --> TT "*" FF { Mult-op: [(-arg1 TT) (-arg2 FF)] }
+       | FF ;
+
+FF --> "(" EE ")"    { factor: [(-value EE)] }
+       | IDENTIFIER  { factor: [(-value IDENTIFIER)] }
+       | NUMBER      { factor: [(-value NUMBER)] } ;
+
+
+;;;; arith-exp.zb                     -- 2003-11-13 06:35:51 -- pascal   ;;;;

@@ -1,0 +1,77 @@
+diff -NaurtbB --exclude 'zmg-dom.lisp*' zebu-3.5.5-original/COMPILE-ZEBU.lisp zebu-3.5.5/COMPILE-ZEBU.lisp
+--- zebu-3.5.5-original/COMPILE-ZEBU.lisp	1997-10-03 00:57:58.000000000 +0200
++++ zebu-3.5.5/COMPILE-ZEBU.lisp	2003-11-13 03:57:46.000000000 +0100
+@@ -174,6 +174,7 @@
+                      (when (or (null odate) (> idate odate))
+                        ;; now do the postponed loads
+                        (do-post-poned-load)
++                       (ensure-directories-exist ofile)
+                        (compile-file ifile :output-file ofile))))
+           (load                         ; postpone load
+            (push file-path load-before-compile))
+diff -NaurtbB --exclude 'zmg-dom.lisp*' zebu-3.5.5-original/ZEBU-init.lisp zebu-3.5.5/ZEBU-init.lisp
+--- zebu-3.5.5-original/ZEBU-init.lisp	1999-01-07 20:15:55.000000000 +0100
++++ zebu-3.5.5/ZEBU-init.lisp	2003-11-13 03:49:17.000000000 +0100
+@@ -38,9 +38,9 @@
+   (make-pathname 
+    :directory
+    (pathname-directory
+-    #+CLISP   *load-truename*
+     #-ALLEGRO #+MCL (truename *loading-file-source-file*)
+-    #-ALLEGRO #-MCL *load-pathname*
++    #-ALLEGRO #-MCL #-CLISP *load-pathname*
++    #-ALLEGRO #-MCL #+CLISP *load-truename*
+     #+ALLEGRO (merge-pathnames *load-pathname*
+                                *default-pathname-defaults*)))
+   )
+@@ -68,7 +68,10 @@
+ #+(or (and WINDOWS ACL3.0) :HARLEQUIN-PC-LISP)
+ (defvar *load-binary-pathname-types* '("fsl"))
+ 
+-(unless (probe-file *ZEBU-binary-directory*)
++#+clisp (ensure-directories-exist
++         (make-pathname :name "test" :type "lisp"
++                        :defaults  *ZEBU-binary-directory*))
++#-clisp (unless (probe-file *ZEBU-binary-directory*)
+   #+LUCID
+   (shell (format nil "mkdir ~a" (namestring *ZEBU-binary-directory*)))
+   #+ALLEGRO
+diff -NaurtbB --exclude 'zmg-dom.lisp*' zebu-3.5.5-original/zebu-aux.lisp zebu-3.5.5/zebu-aux.lisp
+--- zebu-3.5.5-original/zebu-aux.lisp	1998-12-09 21:22:24.000000000 +0100
++++ zebu-3.5.5/zebu-aux.lisp	2003-11-13 03:49:17.000000000 +0100
+@@ -23,10 +23,14 @@
+ 
+ #-LUCID (declaim (special *load-source-pathname-types* 
+                           *load-binary-pathname-types*))
+-#+(or MCL Allegro CLISP)
++#+(or MCL Allegro)
+ (setq *load-source-pathname-types* '("lisp" NIL)
+       *load-binary-pathname-types* '("fasl"))
+ 
++#+clisp
++(setq *load-source-pathname-types* '("lisp" NIL)
++      *load-binary-pathname-types* '("fas"))
++
+ #+(and :SUN :LUCID)
+ (setq *load-binary-pathname-types* '("sbin"))
+ 
+diff -NaurtbB --exclude 'zmg-dom.lisp*' zebu-3.5.5-original/zebu-package.lisp zebu-3.5.5/zebu-package.lisp
+--- zebu-3.5.5-original/zebu-package.lisp	1996-03-07 18:13:58.000000000 +0100
++++ zebu-3.5.5/zebu-package.lisp	2003-11-13 03:49:17.000000000 +0100
+@@ -93,6 +93,16 @@
+ #-LUCID
+ (declaim (special *LOAD-SOURCE-PATHNAME-TYPES*
+                   *LOAD-BINARY-PATHNAME-TYPES*))
++
++(defparameter zb:*zebu-version*
++  (let ((file (make-pathname
++                 :name "Version"
++                 :type nil
++                 :directory (pathname-directory *ZEBU-directory*))))
++      (when (probe-file file)
++        (with-open-file (s file :direction :input)
++          (read-line s)))))
++
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;                            End of zebu-package.l
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
