@@ -1,5 +1,6 @@
 ---
-author: Joachim H. Laubsch <laubsch@cup.hp.com>
+author: Joachim H. Laubsch
+e-mail: laubsch@cup.hp.com
 ---
 
 # Zebu: A Tool for Specifying Reversible LALR(1) Parsers
